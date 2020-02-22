@@ -16,7 +16,7 @@
 //});
 Route::get('/test', 'IndexController@index');
 
-Route::get('/', 'FunctionController@index');
+Route::get('/5e1ac823555215b0', 'FunctionController@index');
 Route::get('/switch', 'FunctionController@switch');
 Route::post('/function/setparam', 'FunctionController@setParam');
 Route::get('/flush', 'FunctionController@flush');

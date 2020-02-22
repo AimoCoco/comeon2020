@@ -164,20 +164,20 @@
                         低于
                     </div>
                     <div class="form-group">
-                        <label for="price2" class="rn"></label>
-                        <input type="text" name="price2" id="price2" value="{{ $data[2]['low'][0] }}">USD
+                        <label for="price" class="rn"></label>
+                        <input type="text" name="price" id="price" value="{{ $data[2]['low'][0] }}">USD
                     </div>
                     <div class="form-group">
                         <label for="do" class="ln"></label>
                         卖出
                     </div>
                     <div class="form-group">
-                        <label for="quantity2" class="rn"></label>
-                        <input type="text" name="quantity2" id="quantity2" value="{{ $data[2]['low'][1] }}">个BTC
+                        <label for="quantity" class="rn"></label>
+                        <input type="text" name="quantity" id="quantity" value="{{ $data[2]['low'][1] }}">个BTC
                     </div>
                     <div class="form-group">
-                        <label for="time2" class="ln">有效期</label>
-                        <input type="text" name="time2" id="time2" placeholder="" value="{{ $data[2]['low'][2] }}">天
+                        <label for="time" class="ln">有效期</label>
+                        <input type="text" name="time" id="time" placeholder="" value="{{ $data[2]['low'][2] }}">天
                     </div>
                     <input type="submit" class="btn btn-success ln">
                 </form>
@@ -187,30 +187,34 @@
                 平仓
                 <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
-                    <input type="hidden" name="type" value="high1">
+                    <input type="hidden" name="type" value="high2">
                     <div class="form-group">
                         <label for="higher" class="rn"></label>
                         高于
                     </div>
                     <div class="form-group">
-                        <label for="price2" class="rn"></label>
-                        <input type="text" name="price2" id="price2" value="{{ $data[2]['high'][0] }}">USD
+                        <label for="price" class="rn"></label>
+                        <input type="text" name="price" id="price" value="{{ $data[2]['high'][0] }}">USD
                     </div>
                     <div class="form-group">
                         <label for="do" class="ln"></label>
                         买入
                     </div>
                     <div class="form-group">
-                        <label for="quantity2" class="rn"></label>
-                        <input type="text" name="quantity2" id="quantity2" value="{{ $data[2]['high'][1] }}">个BTC
+                        <label for="quantity" class="rn"></label>
+                        <input type="text" name="quantity" id="quantity" value="{{ $data[2]['high'][1] }}">个BTC
                     </div>
                     <div class="form-group">
-                        <label for="time2" class="ln">有效期</label>
-                        <input type="text" name="time2" id="time2" placeholder="" value="{{ $data[2]['high'][2] }}">天
+                        <label for="time" class="ln">有效期</label>
+                        <input type="text" name="time" id="time" placeholder="" value="{{ $data[2]['high'][2] }}">天
                     </div>
                     <input type="submit" class="btn btn-success ln">
                 </form>
             </div>
+        </div>
+        <div>
+            <br>
+            <a href="/flush" class="btn btn-danger btn-sm" role="button">&nbsp;一键清空&nbsp;</a>
         </div>
     </div>
 </div>

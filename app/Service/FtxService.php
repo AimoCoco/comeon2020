@@ -127,8 +127,12 @@ class FtxService
 
     public function run()
     {
-        $switch = Redis::get('switch1');
+        $switch = Redis::get('switch'.$this->_account);
         if (!$switch) {
+            return false;
+        }
+
+        if (time() > $this->getLowerEndTime()) {
             return false;
         }
 
@@ -160,11 +164,19 @@ class FtxService
         return Redis::get($key);
     }
 
+    public function getLowerEndTime()
+    {
+        return Redis::get($this->_account.'lower_end_time');
+    }
+
     public function setLowerParam($price, $quantity, $time)
     {
         Redis::set($this->_account.'lower_price', $price);
         Redis::set($this->_account.'lower_quantity', $quantity);
         Redis::set($this->_account.'lower_time', $time);
+        Redis::set($this->_account.'higher_time', $time);
+        $end = time() + $time * 86400;
+        Redis::set($this->_account.'lower_end_time', $end);
         return true;
     }
 
@@ -199,7 +211,10 @@ class FtxService
     {
         Redis::set($this->_account.'higher_price', $price);
         Redis::set($this->_account.'higher_quantity', $quantity);
+        Redis::set($this->_account.'lower_time', $time);
         Redis::set($this->_account.'higher_time', $time);
+        $end = time() + $time * 86400;
+        Redis::set($this->_account.'lower_end_time', $end);
         return true;
     }
 

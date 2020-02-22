@@ -28,7 +28,8 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             for ($i = 0; $i < 10; $i++) {
                 (new FtxService(1))->run();
-                sleep(3);
+                sleep(2);
+                (new FtxService(2))->run();
             }
         })->cron('* * * * *');
 

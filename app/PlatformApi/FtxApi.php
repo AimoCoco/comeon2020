@@ -94,7 +94,7 @@ class FtxApi
             'market' => 'BTC-PERP',
             'side' => $side,
             'type' => 'market',
-            'size' => $size,
+            'size' => floatval($size),
             'price' => null,
         ];
 

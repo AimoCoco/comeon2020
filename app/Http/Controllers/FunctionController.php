@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\PlatformApi\FtxApi;
 use App\Service\FtxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -64,6 +65,7 @@ class FunctionController extends Controller
 
     public function flush()
     {
-        Redis::flush();
+        Redis::FLUSHDB();
+        return redirect('/');
     }
 }
