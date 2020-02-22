@@ -215,6 +215,9 @@
         </div>
         <div>
             <br>
+            <span>
+                永续合约: {{ $data['currentPrice'] }} &nbsp;&nbsp;&nbsp;
+            </span>
             <a href="/flush" class="btn btn-danger btn-sm" role="button">&nbsp;一键清空&nbsp;</a>
         </div>
     </div>

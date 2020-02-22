@@ -23,6 +23,7 @@ class FunctionController extends Controller
         $data[2]['inFuture'] = $ftx2->isInFuture();
         $data['switch'][1] = Redis::get('switch1');
         $data['switch'][2] = Redis::get('switch2');
+        $data['currentPrice'] = $ftx1->getBTCPERPPrice();
         return view('ftx', ['data' => $data]);
     }
 
