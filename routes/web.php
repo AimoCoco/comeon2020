@@ -11,9 +11,9 @@
 |
 */
 
-//Route::get('/', function () {
-//    return view('ftx');
-//});
+Route::get('/', function () {
+    return view('welcome');
+});
 Route::get('/test', 'IndexController@index');
 
 Route::get('/5e1ac823555215b0', 'FunctionController@index');
