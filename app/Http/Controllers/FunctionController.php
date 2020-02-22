@@ -50,7 +50,7 @@ class FunctionController extends Controller
             default: break;
         }
 
-        return redirect('/');
+        return redirect('/5e1ac823555215b0');
     }
 
     public function switch(Request $request)
@@ -60,12 +60,12 @@ class FunctionController extends Controller
 
         Redis::set('switch'.$group, $action);
 
-        return redirect('/');
+        return redirect('/5e1ac823555215b0');
     }
 
     public function flush()
     {
         Redis::FLUSHDB();
-        return redirect('/');
+        return redirect('/5e1ac823555215b0');
     }
 }
