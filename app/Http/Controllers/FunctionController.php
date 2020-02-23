@@ -24,6 +24,10 @@ class FunctionController extends Controller
         $data['switch'][1] = Redis::get('switch1');
         $data['switch'][2] = Redis::get('switch2');
         $data['currentPrice'] = $ftx1->getBTCPERPPrice();
+        $data['1lowSub'] = config('auth.ftx.future1');
+        $data['1highSub'] = config('auth.ftx.option1');
+        $data['2lowSub'] = config('auth.ftx.future2');
+        $data['2highSub'] = config('auth.ftx.option2');
         return view('ftx', ['data' => $data]);
     }
 

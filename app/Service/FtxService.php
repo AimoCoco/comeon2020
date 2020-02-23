@@ -86,6 +86,8 @@ class FtxService
                             foreach (range(1,3) as $value) {
                                 if ($this->_ftx->orderWithMarket('buy', $higherQuantity)) {
                                     $this->delFuture();
+                                    // 结束此组
+                                    $this->flushThisGroup();
                                     return true;
                                 }
                             }
@@ -144,6 +146,20 @@ class FtxService
         }
 
         return $this->hedge();
+    }
+
+    public function flushThisGroup()
+    {
+        Redis::del($this->_account.'lower_price');
+        Redis::del($this->_account.'lower_quantity');
+        Redis::del($this->_account.'lower_time');
+        Redis::del($this->_account.'lower_end_time');
+        Redis::del($this->_account.'higher_price');
+        Redis::del($this->_account.'higher_quantity');
+        Redis::del($this->_account.'higher_time');
+        Redis::del($this->_account.'higher_time');
+        Redis::set('switch'.$this->_account, 0);
+        return true;
     }
 
     public function getLowerPrice()

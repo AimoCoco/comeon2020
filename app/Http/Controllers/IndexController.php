@@ -16,7 +16,7 @@ class IndexController extends Controller
 {
     public function index()
     {
-        dd((new FtxService(1))->getIsHaveOption());
+//        dd((new FtxService(1))->getIsHaveOption());
         $ftxApi = new FtxApi(
             config('auth.ftx.key1'),
             config('auth.ftx.secret1'),
@@ -26,11 +26,6 @@ class IndexController extends Controller
 
 //        dd($ftxApi->getOptionsAccountInfo());
 //        dd($ftxApi->getOptionsPositions()); //result是空数组证明没有期权单了
-        $ftxApi = new \ccxt\ftx([
-            'apiKey' => config('auth.ftx.key'),
-            'secret' => config('auth.ftx.secret'),
-        ]);
-        dd($ftxApi->create_market_sell_order('BTC-PERP', 0.001));
 //        dd($ftxApi->create_market_sell_order('BTC-PERP', 0.001));
 //        dd($ftxApi->getAllBalance());
 //        dd($ftxApi->getAllBalances());

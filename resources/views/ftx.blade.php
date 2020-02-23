@@ -73,7 +73,7 @@
             </div>
             <br>
             <div class="table-bordered" style="padding: 1px 10px">
-                开仓
+                开仓 &nbsp; ({{ $data['1lowSub'] }})
                 <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data" >
                     {{ csrf_field() }}
                     <input type="hidden" name="type" value="low1">
@@ -102,7 +102,7 @@
             </div>
             <br>
             <div class="table-bordered" style="padding: 1px 10px">
-                平仓
+                平仓 &nbsp; ({{ $data['1highSub'] }})
                 <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <input type="hidden" name="type" value="high1">
@@ -156,7 +156,7 @@
             </div>
             <br>
             <div class="table-bordered" style="padding: 1px 10px">
-                开仓
+                开仓  &nbsp; ({{ $data['2lowSub'] }})
                 <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <input type="hidden" name="type" value="low2">
@@ -185,7 +185,7 @@
             </div>
             <br>
             <div class="table-bordered" style="padding: 1px 10px">
-                平仓
+                平仓 &nbsp; ({{ $data['2highSub'] }})
                 <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <input type="hidden" name="type" value="high2">

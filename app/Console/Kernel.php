@@ -26,9 +26,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function () {
-            for ($i = 0; $i < 10; $i++) {
+            for ($i = 0; $i < 30; $i++) {
                 (new FtxService(1))->run();
-                sleep(2);
+                sleep(1);
                 (new FtxService(2))->run();
             }
         })->cron('* * * * *');
