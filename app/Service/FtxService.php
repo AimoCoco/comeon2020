@@ -74,6 +74,7 @@ class FtxService
     public function hedge()
     {
         if ($btcPrice = $this->getBTCPERPPrice()) {
+            // 价格低于
             if ($btcPrice < $this->getLowerPrice()) {
                 // 已开仓
                 if ($this->isInFuture()) {
@@ -106,8 +107,9 @@ class FtxService
                     }
                 }
             } else {
+                // 价格高于
                 if ($this->isInFuture()) {
-                    // 已开仓
+                    // 已开仓，撤掉保护
                     if ($higherQuantity = $this->getHigherQuantity()) {
                         foreach (range(1,3) as $value) {
                             if ($this->_ftx->orderWithMarket('buy', $higherQuantity)) {
@@ -127,14 +129,109 @@ class FtxService
         return '获取BTC-PERP价格失败';
     }
 
+    public function hedge2()
+    {
+        // 低于介入保护价格，下开仓条件单(如果失败，改成下市价单)；条件单成交后下平仓条件单(reduceOnly)；无期权了，市价止损，取消所有订单
+        if ($btcPrice = $this->getBTCPERPPrice()) {
+            // 低于介入保护价格, 下条件单(如果失败，改成下市价单)
+            if ($btcPrice < $this->getStartPrice()) {
+                // 是否已经下了开仓单
+                if (!$this->getOpenOrder()) {
+                    if (!$this->_ftx->placeTriggerOrder('sell', $this->getLowerQuantity(), $this->getLowerPrice())) {
+                        if (!$this->_ftx->orderWithMarket('sell', $this->getLowerQuantity())) {
+                            return false;
+                        }
+                    }
+                    // 标记下了开仓单
+                    $this->setOpenOrder();
+                } else {
+                    if ($btcPrice < $this->getLowerPrice()) {
+                        // 是否已经下了平仓单
+                        if (!$this->getCloseOrder()) {
+                            if (!$this->_ftx->placeTriggerOrder('buy', $this->getHigherQuantity(), $this->getHigherPrice(), true)) {
+                                return false;
+                            }
+                            // 标记已经下了平仓单
+                            $this->setCloseOrder();
+                        }
+
+                        if ($this->getIsHaveOption()) {
+                            // 有期权
+                            return true;
+                        } else {
+                            // 无期权
+                            if ($higherQuantity = $this->getHigherQuantity()) {
+                                foreach (range(1, 3) as $value) {
+                                    if ($this->_ftx->orderWithMarket('buy', $higherQuantity, true)) {
+                                        // 结束此组
+//                                        $this->flushThisGroup1();
+                                        return true;
+                                    }
+                                }
+                            }
+                            return false;
+                        }
+                    } else {
+                        // 清除开仓单和平仓单状态
+                        $this->delOpenOrder();
+                        $this->delCloseOrder();
+                    }
+                }
+            } elseif ($btcPrice > $this->get2StartPrice()) {
+                // 是否已经下了开仓单
+                if (!$this->get2OpenOrder()) {
+                    if (!$this->_ftx->placeTriggerOrder('buy', $this->get2HigherQuantity(), $this->get2HigherPrice())) {
+                        if (!$this->_ftx->orderWithMarket('buy', $this->get2HigherQuantity())) {
+                            return false;
+                        }
+                    }
+                    // 标记下了开仓单
+                    $this->set2OpenOrder();
+                } else {
+                    if ($btcPrice > $this->get2HigherPrice()) {
+                        // 是否已经下了平仓单
+                        if (!$this->get2CloseOrder()) {
+                            if (!$this->_ftx->placeTriggerOrder('sell', $this->get2LowerQuantity(), $this->get2LowerPrice(), true)) {
+                                return false;
+                            }
+                            // 标记已经下了平仓单
+                            $this->set2CloseOrder();
+                        }
+
+                        if ($this->getIsHaveOption()) {
+                            // 有期权
+                            return true;
+                        } else {
+                            // 无期权
+                            if ($higherQuantity = $this->get2LowerQuantity()) {
+                                foreach (range(1, 3) as $value) {
+                                    if ($this->_ftx->orderWithMarket('sell', $higherQuantity, true)) {
+                                        // 结束此组
+//                                        $this->flushThisGroup1();
+                                        return true;
+                                    }
+                                }
+                            }
+                            return false;
+                        }
+                    } else {
+                        // 清除开仓单和平仓单状态
+                        $this->del2OpenOrder();
+                        $this->del2CloseOrder();
+                    }
+                }
+            } else {
+                return '未触发上下保护介入价格';
+            }
+        }
+
+        return '获取BTC-PERP价格失败';
+    }
+
     public function run()
     {
         $switch = Redis::get('switch'.$this->_account);
         if (!$switch) {
-            return false;
-        }
-
-        if (time() > $this->getLowerEndTime()) {
             return false;
         }
 
@@ -150,16 +247,100 @@ class FtxService
 
     public function flushThisGroup()
     {
+        Redis::del($this->_account.'start_lower_price');
         Redis::del($this->_account.'lower_price');
         Redis::del($this->_account.'lower_quantity');
-        Redis::del($this->_account.'lower_time');
-        Redis::del($this->_account.'lower_end_time');
+        Redis::del($this->_account.'start_higher_price');
         Redis::del($this->_account.'higher_price');
         Redis::del($this->_account.'higher_quantity');
-        Redis::del($this->_account.'higher_time');
-        Redis::del($this->_account.'higher_time');
         Redis::set('switch'.$this->_account, 0);
         return true;
+    }
+
+    public function flushThisGroup1()
+    {
+        Redis::set('switch'.$this->_account, 0);
+        Redis::del($this->_account.'start_price');
+        Redis::del($this->_account.'lower_price');
+        Redis::del($this->_account.'lower_quantity');
+        Redis::del($this->_account.'higher_price');
+        Redis::del($this->_account.'higher_quantity');
+        return true;
+    }
+
+    public function flushThisGroup2()
+    {
+        Redis::set('switch'.$this->_account, 0);
+        Redis::del($this->_account.'2start_price');
+        Redis::del($this->_account.'2lower_price');
+        Redis::del($this->_account.'2lower_quantity');
+        Redis::del($this->_account.'2start_higher_price');
+        Redis::del($this->_account.'2higher_price');
+        Redis::del($this->_account.'2higher_quantity');
+        return true;
+    }
+
+    /****************** start ***************************/
+    public function setStartPrice($startPrice)
+    {
+        Redis::set($this->_account.'start_price', $startPrice);
+        return true;
+    }
+
+    public function getStartPrice()
+    {
+        $key = $this->_account . 'start_price';
+        return Redis::get($key);
+    }
+
+    public function setOpenOrder() {
+        Redis::set($this->_account.'open_order', true);
+        return true;
+    }
+
+    public function delOpenOrder() {
+        Redis::del($this->_account.'open_order');
+        return true;
+    }
+
+    public function getOpenOrder()
+    {
+        Redis::get($this->_account.'open_order');
+        return true;
+    }
+
+    public function setCloseOrder()
+    {
+        Redis::set($this->_account.'close_order', true);
+        return true;
+    }
+
+    public function getCloseOrder()
+    {
+        Redis::get($this->_account.'close_order');
+        return true;
+    }
+
+    public function delCloseOrder()
+    {
+        Redis::del($this->_account.'close_order');
+        return true;
+    }
+
+    /****************** lower ***************************/
+    public function setLowerParam($price, $quantity)
+    {
+        Redis::set($this->_account.'lower_price', $price);
+        Redis::set($this->_account.'lower_quantity', $quantity);
+        return true;
+    }
+
+    public function getLowerParam()
+    {
+        return Redis::mget([
+            $this->_account.'lower_price',
+            $this->_account.'lower_quantity',
+        ]);
     }
 
     public function getLowerPrice()
@@ -174,34 +355,19 @@ class FtxService
         return Redis::get($key);
     }
 
-    public function getLowerTime()
+    /****************** higher ***************************/
+    public function setHigherParam($price, $quantity)
     {
-        $key = $this->_account . 'lower_time';
-        return Redis::get($key);
-    }
-
-    public function getLowerEndTime()
-    {
-        return Redis::get($this->_account.'lower_end_time');
-    }
-
-    public function setLowerParam($price, $quantity, $time)
-    {
-        Redis::set($this->_account.'lower_price', $price);
-        Redis::set($this->_account.'lower_quantity', $quantity);
-        Redis::set($this->_account.'lower_time', $time);
-        Redis::set($this->_account.'higher_time', $time);
-        $end = time() + $time * 86400;
-        Redis::set($this->_account.'lower_end_time', $end);
+        Redis::set($this->_account.'higher_price', $price);
+        Redis::set($this->_account.'higher_quantity', $quantity);
         return true;
     }
 
-    public function getLowerParam()
+    public function getHigherParam()
     {
         return Redis::mget([
-            $this->_account.'lower_price',
-            $this->_account.'lower_quantity',
-            $this->_account.'lower_time'
+            $this->_account.'higher_price',
+            $this->_account.'higher_quantity',
         ]);
     }
 
@@ -217,32 +383,110 @@ class FtxService
         return Redis::get($key);
     }
 
-    public function getHigherTime()
+    /****************** 2start ***************************/
+    public function set2StartPrice($startPrice)
     {
-        $key = $this->_account . 'higher_time';
-        return Redis::get($key);
-    }
-
-    public function setHigherParam($price, $quantity, $time)
-    {
-        Redis::set($this->_account.'higher_price', $price);
-        Redis::set($this->_account.'higher_quantity', $quantity);
-        Redis::set($this->_account.'lower_time', $time);
-        Redis::set($this->_account.'higher_time', $time);
-        $end = time() + $time * 86400;
-        Redis::set($this->_account.'lower_end_time', $end);
+        Redis::set($this->_account.'2start_price', $startPrice);
         return true;
     }
 
-    public function getHigherParam()
+    public function get2StartPrice()
+    {
+        $key = $this->_account . '2start_price';
+        return Redis::get($key);
+    }
+
+    public function set2OpenOrder() {
+        Redis::set($this->_account.'2open_order', true);
+        return true;
+    }
+
+    public function del2OpenOrder() {
+        Redis::del($this->_account.'2open_order');
+        return true;
+    }
+
+    public function get2OpenOrder()
+    {
+        Redis::get($this->_account.'2open_order');
+        return true;
+    }
+
+    public function set2CloseOrder()
+    {
+        Redis::set($this->_account.'2close_order', true);
+        return true;
+    }
+
+    public function get2CloseOrder()
+    {
+        Redis::get($this->_account.'2close_order');
+        return true;
+    }
+
+    public function del2CloseOrder()
+    {
+        Redis::del($this->_account.'2close_order');
+        return true;
+    }
+
+    /****************** lower ***************************/
+    public function set2LowerParam($price, $quantity)
+    {
+        Redis::set($this->_account.'2lower_price', $price);
+        Redis::set($this->_account.'2lower_quantity', $quantity);
+        return true;
+    }
+
+    public function get2LowerParam()
     {
         return Redis::mget([
-            $this->_account.'higher_price',
-            $this->_account.'higher_quantity',
-            $this->_account.'higher_time'
+            $this->_account.'2lower_price',
+            $this->_account.'2lower_quantity',
         ]);
     }
 
+    public function get2LowerPrice()
+    {
+        $key = $this->_account . '2lower_price';
+        return Redis::get($key);
+    }
+
+    public function get2LowerQuantity()
+    {
+        $key = $this->_account . '2lower_quantity';
+        return Redis::get($key);
+    }
+
+    /****************** higher ***************************/
+    public function set2HigherParam($price, $quantity)
+    {
+        Redis::set($this->_account.'2higher_price', $price);
+        Redis::set($this->_account.'2higher_quantity', $quantity);
+        return true;
+    }
+
+    public function get2HigherParam()
+    {
+        return Redis::mget([
+            $this->_account.'2higher_price',
+            $this->_account.'2higher_quantity',
+        ]);
+    }
+
+    public function get2HigherPrice()
+    {
+        $key = $this->_account . '2higher_price';
+        return Redis::get($key);
+    }
+
+    public function get2HigherQuantity()
+    {
+        $key = $this->_account . '2higher_quantity';
+        return Redis::get($key);
+    }
+
+    /*************** future *******************/
     public function isInFuture()
     {
         $key = $this->_account . 'future';

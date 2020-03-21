@@ -21,7 +21,10 @@ class IndexController extends Controller
             config('auth.ftx.key1'),
             config('auth.ftx.secret1'),
             config('auth.ftx.future1'));
-        dd($ftxApi->getOrdersHistory());
+        dd($ftxApi->placeTriggerOrder('buy', 0.001, 6100));
+//        dd($ftxApi->cancelAllOrders());
+//        dd($ftxApi->getOrdersStatus(937202));
+        dd($ftxApi->cancelAllTriggerOrders());
 //        dd($ftxApi->orderWithMarket('buy', 0.001));
 
 //        dd($ftxApi->getOptionsAccountInfo());

@@ -86,7 +86,7 @@ class FtxApi
         return $this->authQuery($data);
     }
 
-    public function orderWithMarket($side = 'sell', $size = 0)
+    public function orderWithMarket($side = 'sell', $size = 0, $reduceOnly = false)
     {
         $data['method'] = "POST";
         $data['function'] = "orders";
@@ -96,6 +96,7 @@ class FtxApi
             'type' => 'market',
             'size' => floatval($size),
             'price' => null,
+            'reduceOnly' => $reduceOnly
         ];
 
         return $this->authQuery($data);
@@ -119,6 +120,84 @@ class FtxApi
 //            "type" => "market"
 //          ]
 //        "success" => true
+    }
+
+    /**
+     * @param $side 'sell'|'sell'
+     * @param $size double
+     * @param $triggerPrice double
+     * @param $reduceOnly bool
+     * @return bool
+     */
+    public function placeTriggerOrder($side = 'buy', $size = 0, $triggerPrice = 0, $reduceOnly = false)
+    {
+        $data['method'] = "POST";
+        $data['function'] = "conditional_orders";
+        $data['params'] = [
+            'market' => 'BTC-PERP',
+            'side' => $side,
+            'triggerPrice' => $triggerPrice,
+            'size' => floatval($size),
+            'type' => 'stop',
+            'reduceOnly' => $reduceOnly,
+        ];
+//          "cancelReason" => null
+//          "cancelledAt" => null
+//          "createdAt" => "2020-03-21T14:19:51.496306+00:00"
+//          "error" => null
+//          "future" => "BTC-PERP"
+//          "id" => 937202
+//          "market" => "BTC-PERP"
+//          "orderId" => null
+//          "orderPrice" => null
+//          "orderType" => "market"
+//          "reduceOnly" => false
+//          "retryUntilFilled" => false
+//          "side" => "buy"
+//          "size" => 0.001
+//          "status" => "open"
+//          "trailStart" => null
+//          "trailValue" => null
+//          "triggerPrice" => 6300.0
+//          "triggeredAt" => null
+//          "type" => "stop
+
+        return $this->authQuery($data);
+    }
+
+    public function cancelAllTriggerOrders()
+    {
+        $data['method'] = "DELETE";
+        $data['function'] = "orders";
+        $data['params'] = [
+            'market' => 'BTC-PERP',
+            'conditionalOrdersOnly' => true,
+            'limitOrdersOnly' => false,
+        ];
+
+        return $this->authQuery($data);
+    }
+
+    public function cancelTriggerOrder($id)
+    {
+        $data['method'] = "DELETE";
+        $data['function'] = "conditional_orders/". $id;
+        $data['params'] = [
+            'market' => 'BTC-PERP',
+        ];
+
+        return $this->authQuery($data);
+    }
+
+    public function getOrdersStatus($orderId)
+    {
+        $data['method'] = "GET";
+        $data['function'] = "orders/by_client_id/" . $orderId;
+        $data['params'] = [
+            'market' => 'BTC-PERP'
+        ];
+
+        return $this->authQuery($data);
     }
 
     public function getOrdersHistory()
@@ -277,7 +356,7 @@ class FtxApi
             $path .= "?" . $params;
         }
         $nonce = $this->generateNonce();
-        if($method == "GET") {
+        if($method == "GET" || $method == "DELETE") {
             $post = "";
         }
         else {
@@ -296,13 +375,11 @@ class FtxApi
             $headers[] = "FTX-SUBACCOUNT: {$this->subName}";
         }
 
-        $headers[] = 'Connection: Keep-Alive';
-        $headers[] = 'Keep-Alive: 90';
-
         curl_reset($this->ch);
         curl_setopt($this->ch, CURLOPT_URL, $url);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($this->ch, CURLOPT_ENCODING, '');
         if($data['method'] == "POST") {
             curl_setopt($this->ch, CURLOPT_POST, true);
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $post);

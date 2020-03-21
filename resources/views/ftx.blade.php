@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="refresh" content="10">
+    {{--<meta http-equiv="refresh" content="10">--}}
 
     <title>FtxSys</title>
 
@@ -19,9 +19,9 @@
             color: #636b6f;
         }
 
-        .full-height {
-            height: 80vh;
-        }
+        /*.full-height {*/
+            /*height: 80vh;*/
+        /*}*/
 
         .flex-center {
             align-items: center;
@@ -50,11 +50,18 @@
 <body>
 <div class="flex-center position-ref full-height">
     <div class="content">
-        <div style="border: black solid 1px;">
+        <div style="border: black solid 1px; float: left">
             <div>
-                <table class="table-bordered" align="center" style="width:600px">
+                <table class="table-bordered" align="center" style="">
                     <tr>
-                        <td>第一组账号运行状态</td>
+                        <td>A组 SELLPUT账户组</td>
+                        <td>
+                            OPTION设立的账号名称：{{ $data['1highSub'] }} <br>
+                            OPTION对冲保护的账号名：{{ $data['1lowSub'] }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>账号运行状态</td>
                         <td>
                             <?php if($data['switch'][1]) { ?>
                                 run &nbsp;<a href="/switch?key=1&action=0" class="btn btn-danger btn-sm" role="button">&nbsp;关闭&nbsp;</a>
@@ -66,14 +73,28 @@
                     <tr>
                         <td>是否进入强平保护</td>
                         <td>
-                            {{ $data[1]['inFuture'] ? '是' : '否' }}
+{{--                            {{ $data[1]['inFuture'] ? '是' : '否' }}--}}
                         </td>
                     </tr>
                 </table>
             </div>
-            <br>
             <div class="table-bordered" style="padding: 1px 10px">
-                开仓 &nbsp; ({{ $data['1lowSub'] }})
+                <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data" >
+                    {{ csrf_field() }}
+                    <input type="hidden" name="type" value="1start">
+                    <div class="form-group">
+                        <label for="lower" class="rn"></label>
+                        SELLPUT保护介入价格
+                    </div>
+                    <div class="form-group">
+                        <label for="price" class="rn"></label>
+                        <input type="text" name="price" id="price" value="{{ $data[1]['start'] }}">USD
+                    </div>
+                    <input type="submit" class="btn btn-success ln">
+                </form>
+            </div>
+            <div class="table-bordered" style="padding: 1px 10px">
+                开仓
                 <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data" >
                     {{ csrf_field() }}
                     <input type="hidden" name="type" value="low1">
@@ -93,16 +114,11 @@
                         <label for="quantity" class="rn"></label>
                         <input type="text" name="quantity" id="quantity" value="{{ $data[1]['low'][1] }}">个BTC
                     </div>
-                    <div class="form-group">
-                        <label for="time" class="ln">有效期</label>
-                        <input type="text" name="time" id="time" value="{{ $data[1]['low'][2] }}" placeholder="">天
-                    </div>
                     <input type="submit" class="btn btn-success ln">
                 </form>
             </div>
-            <br>
             <div class="table-bordered" style="padding: 1px 10px">
-                平仓 &nbsp; ({{ $data['1highSub'] }})
+                平仓
                 <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <input type="hidden" name="type" value="high1">
@@ -122,22 +138,23 @@
                         <label for="quantity" class="rn"></label>
                         <input type="text" name="quantity" id="quantity" value="{{ $data[1]['high'][1] }}">个BTC
                     </div>
-                    <div class="form-group">
-                        <label for="time" class="ln">有效期</label>
-                        <input type="text" name="time" id="time" placeholder="" value="{{ $data[1]['high'][2] }}">天
-                    </div>
                     <input type="submit" class="btn btn-success ln">
                 </form>
             </div>
         </div>
 
-        <br>
-
-        <div style="border: black solid 1px;">
+        <div style="border: black solid 1px; float: right">
             <div>
                 <table class="table-bordered" align="center" style="width:600px">
                     <tr>
-                        <td>第二组账号运行状态</td>
+                        <td>A组 SELLCALL账户组</td>
+                        <td>
+                            OPTION设立的账号名称：{{ $data['1highSub2'] }} <br>
+                            OPTION对冲保护的账号名：{{ $data['1lowSub'] }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>账号运行状态</td>
                         <td>
                             <?php if($data['switch'][2]) { ?>
                             run &nbsp;<a href="/switch?key=2&action=0" class="btn btn-danger btn-sm" role="button">&nbsp;关闭&nbsp;</a>
@@ -149,53 +166,38 @@
                     <tr>
                         <td>是否进入强平保护</td>
                         <td>
-                            {{ $data[2]['inFuture'] ? '是' : '否' }}
+{{--                            {{ $data[1]['inFuture'] ? '是' : '否' }}--}}
                         </td>
                     </tr>
                 </table>
             </div>
-            <br>
             <div class="table-bordered" style="padding: 1px 10px">
-                开仓  &nbsp; ({{ $data['2lowSub'] }})
-                <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data">
+                <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data" >
                     {{ csrf_field() }}
-                    <input type="hidden" name="type" value="low2">
+                    <input type="hidden" name="type" value="1start_2">
                     <div class="form-group">
                         <label for="lower" class="rn"></label>
-                        低于
+                        SELLCALL保护介入价格
                     </div>
                     <div class="form-group">
                         <label for="price" class="rn"></label>
-                        <input type="text" name="price" id="price" value="{{ $data[2]['low'][0] }}">USD
-                    </div>
-                    <div class="form-group">
-                        <label for="do" class="ln"></label>
-                        卖出
-                    </div>
-                    <div class="form-group">
-                        <label for="quantity" class="rn"></label>
-                        <input type="text" name="quantity" id="quantity" value="{{ $data[2]['low'][1] }}">个BTC
-                    </div>
-                    <div class="form-group">
-                        <label for="time" class="ln">有效期</label>
-                        <input type="text" name="time" id="time" placeholder="" value="{{ $data[2]['low'][2] }}">天
+                        <input type="text" name="price" id="price" value="{{ $data[1]['2start'] }}">USD
                     </div>
                     <input type="submit" class="btn btn-success ln">
                 </form>
             </div>
-            <br>
             <div class="table-bordered" style="padding: 1px 10px">
-                平仓 &nbsp; ({{ $data['2highSub'] }})
+                开仓
                 <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
-                    <input type="hidden" name="type" value="high2">
+                    <input type="hidden" name="type" value="high1_2">
                     <div class="form-group">
                         <label for="higher" class="rn"></label>
                         高于
                     </div>
                     <div class="form-group">
                         <label for="price" class="rn"></label>
-                        <input type="text" name="price" id="price" value="{{ $data[2]['high'][0] }}">USD
+                        <input type="text" name="price" id="price" value="{{ $data[1]['2high'][0] }}">USD
                     </div>
                     <div class="form-group">
                         <label for="do" class="ln"></label>
@@ -203,16 +205,37 @@
                     </div>
                     <div class="form-group">
                         <label for="quantity" class="rn"></label>
-                        <input type="text" name="quantity" id="quantity" value="{{ $data[2]['high'][1] }}">个BTC
+                        <input type="text" name="quantity" id="quantity" value="{{ $data[1]['2high'][1] }}">个BTC
+                    </div>
+                    <input type="submit" class="btn btn-success ln">
+                </form>
+            </div>
+            <div class="table-bordered" style="padding: 1px 10px">
+                平仓
+                <form class="form-inline" action="{{url('function/setparam')}}" method="post" enctype="multipart/form-data" >
+                    {{ csrf_field() }}
+                    <input type="hidden" name="type" value="low1_2">
+                    <div class="form-group">
+                        <label for="lower" class="rn"></label>
+                        低于
                     </div>
                     <div class="form-group">
-                        <label for="time" class="ln">有效期</label>
-                        <input type="text" name="time" id="time" placeholder="" value="{{ $data[2]['high'][2] }}">天
+                        <label for="price" class="rn"></label>
+                        <input type="text" name="price" id="price" value="{{ $data[1]['2low'][0] }}">USD
+                    </div>
+                    <div class="form-group">
+                        <label for="do" class="ln"></label>
+                        卖出
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity" class="rn"></label>
+                        <input type="text" name="quantity" id="quantity" value="{{ $data[1]['2low'][1] }}">个BTC
                     </div>
                     <input type="submit" class="btn btn-success ln">
                 </form>
             </div>
         </div>
+
         <div>
             <br>
             <span>

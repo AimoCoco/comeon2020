@@ -104,9 +104,11 @@ return [
         'secret1' => env('FTX1_SECRET', ''),
         'future1' => env('FTX1_FUTURE', ''),
         'option1' => env('FTX1_OPTION', ''),
+        'option1_2' => env('FTX1_OPTION_2', ''),
         'key2' => env('FTX2_KEY', ''),
         'secret2' => env('FTX2_SECRET', ''),
         'future2' => env('FTX2_FUTURE', ''),
         'option2' => env('FTX2_OPTION', ''),
+        'option2_2' => env('FTX2_OPTION_2', ''),
     ]
 ];
