@@ -177,6 +177,8 @@ class FtxService
                     } else {
                         // 无期权
                         if ($higherQuantity = $this->getHigherQuantity()) {
+                            $this->_ftx->cancelAllTriggerOrders();
+
                             foreach (range(1, 3) as $value) {
                                 if ($this->_ftx->orderWithMarket('buy', $higherQuantity, true)) {
                                     // 结束此组
@@ -234,6 +236,8 @@ class FtxService
                     } else {
                         // 无期权
                         if ($higherQuantity = $this->get2LowerQuantity()) {
+                            $this->_ftx->cancelAllTriggerOrders();
+
                             foreach (range(1, 3) as $value) {
                                 if ($this->_ftx->orderWithMarket('sell', $higherQuantity, true)) {
                                     // 结束此组
