@@ -16,21 +16,33 @@ class FunctionController extends Controller
 
         // A组 SELLPUT 和 SELLCALL
         $ftx1 = new FtxService(1);
-//        $ftx2 = new FtxService(2);
         $data[1]['start'] = $ftx1->getStartPrice();
         $data[1]['low'] = $ftx1->getLowerParam();
         $data[1]['high'] = $ftx1->getHigherParam();
-//        $data[1]['inFuture'] = $ftx1->isInFuture();
         $data[1]['2start'] = $ftx1->get2StartPrice();
         $data[1]['2low'] = $ftx1->get2LowerParam();
         $data[1]['2high'] = $ftx1->get2HigherParam();
 
+        // B组 SELLPUT 和 SELLCALL
+        $ftx2 = new FtxService(2);
+        $data[2]['start'] = $ftx2->getStartPrice();
+        $data[2]['low'] = $ftx2->getLowerParam();
+        $data[2]['high'] = $ftx2->getHigherParam();
+        $data[2]['2start'] = $ftx2->get2StartPrice();
+        $data[2]['2low'] = $ftx2->get2LowerParam();
+        $data[2]['2high'] = $ftx2->get2HigherParam();
+
         $data['switch'][1] = Redis::get('switch1');
+        $data['switch'][12] = Redis::get('switch12');
         $data['switch'][2] = Redis::get('switch2');
+        $data['switch'][22] = Redis::get('switch22');
+
         $data['currentPrice'] = $ftx1->getBTCPERPPrice();
+
         $data['1lowSub'] = config('auth.ftx.future1');
         $data['1highSub'] = config('auth.ftx.option1');
         $data['1highSub2'] = config('auth.ftx.option1_2');
+
         $data['2lowSub'] = config('auth.ftx.future2');
         $data['2highSub'] = config('auth.ftx.option2');
         $data['2highSub2'] = config('auth.ftx.option2_2');
@@ -72,6 +84,13 @@ class FunctionController extends Controller
             case '1start_2' : $setFun(1, 'start2', $price, $quantity); break;
             case 'low1_2' : $setFun(1, 'low2', $price, $quantity); break;
             case 'high1_2' : $setFun(1, 'high2', $price, $quantity); break;
+
+            case '2start' : $setFun(2, 'start', $price, $quantity); break;
+            case '2low1' : $setFun(2, 'low', $price, $quantity); break;
+            case '2high1' : $setFun(2, 'high', $price, $quantity); break;
+            case '21start_2' : $setFun(2, 'start2', $price, $quantity); break;
+            case '2low1_2' : $setFun(2, 'low2', $price, $quantity); break;
+            case '2high1_2' : $setFun(2, 'high2', $price, $quantity); break;
             default: break;
         }
 

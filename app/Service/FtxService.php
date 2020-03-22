@@ -135,6 +135,11 @@ class FtxService
         if ($btcPrice = $this->getBTCPERPPrice()) {
             // 低于介入保护价格, 下条件单(如果失败，改成下市价单)
             if ($btcPrice < $this->getStartPrice()) {
+                $switch = Redis::get('switch'.$this->_account);
+                if (!$switch) {
+                    return false;
+                }
+
                 // 是否已经下了开仓单
                 if (!$this->getOpenOrder()) {
                     if (!$this->_ftx->placeTriggerOrder('sell', $this->getLowerQuantity(), $this->getLowerPrice())) {
@@ -144,40 +149,49 @@ class FtxService
                     }
                     // 标记下了开仓单
                     $this->setOpenOrder();
-                } else {
-                    if ($btcPrice < $this->getLowerPrice()) {
-                        // 是否已经下了平仓单
-                        if (!$this->getCloseOrder()) {
-                            if (!$this->_ftx->placeTriggerOrder('buy', $this->getHigherQuantity(), $this->getHigherPrice(), true)) {
-                                return false;
-                            }
-                            // 标记已经下了平仓单
-                            $this->setCloseOrder();
-                        }
+                }
 
-                        if ($this->getIsHaveOption()) {
-                            // 有期权
-                            return true;
-                        } else {
-                            // 无期权
-                            if ($higherQuantity = $this->getHigherQuantity()) {
-                                foreach (range(1, 3) as $value) {
-                                    if ($this->_ftx->orderWithMarket('buy', $higherQuantity, true)) {
-                                        // 结束此组
-//                                        $this->flushThisGroup1();
-                                        return true;
-                                    }
-                                }
-                            }
+                if ($btcPrice < $this->getLowerPrice()) {
+                    // 是否已经下了平仓单
+                    if (!$this->getCloseOrder()) {
+                        if (!$this->_ftx->placeTriggerOrder('buy', $this->getHigherQuantity(), $this->getHigherPrice(), true)) {
                             return false;
                         }
+                        // 标记已经下了平仓单
+                        $this->setCloseOrder();
+                    }
+
+                    if ($this->getIsHaveOption()) {
+                        // 有期权
+                        return true;
                     } else {
-                        // 清除开仓单和平仓单状态
+                        // 无期权
+                        if ($higherQuantity = $this->getHigherQuantity()) {
+                            foreach (range(1, 3) as $value) {
+                                if ($this->_ftx->orderWithMarket('buy', $higherQuantity, true)) {
+                                    // 结束此组
+                                    $this->flushThisGroup1();
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+                } else {
+                    // 在start和lower之间，如果有了平仓单标记，说明是第二轮了
+                    if ($this->getCloseOrder()) {
                         $this->delOpenOrder();
                         $this->delCloseOrder();
+                        return true;
                     }
                 }
+
             } elseif ($btcPrice > $this->get2StartPrice()) {
+                $switch = Redis::get('switch'.$this->_account.'2');
+                if (!$switch) {
+                    return false;
+                }
+
                 // 是否已经下了开仓单
                 if (!$this->get2OpenOrder()) {
                     if (!$this->_ftx->placeTriggerOrder('buy', $this->get2HigherQuantity(), $this->get2HigherPrice())) {
@@ -187,37 +201,40 @@ class FtxService
                     }
                     // 标记下了开仓单
                     $this->set2OpenOrder();
-                } else {
-                    if ($btcPrice > $this->get2HigherPrice()) {
-                        // 是否已经下了平仓单
-                        if (!$this->get2CloseOrder()) {
-                            if (!$this->_ftx->placeTriggerOrder('sell', $this->get2LowerQuantity(), $this->get2LowerPrice(), true)) {
-                                return false;
-                            }
-                            // 标记已经下了平仓单
-                            $this->set2CloseOrder();
-                        }
+                }
 
-                        if ($this->getIsHaveOption()) {
-                            // 有期权
-                            return true;
-                        } else {
-                            // 无期权
-                            if ($higherQuantity = $this->get2LowerQuantity()) {
-                                foreach (range(1, 3) as $value) {
-                                    if ($this->_ftx->orderWithMarket('sell', $higherQuantity, true)) {
-                                        // 结束此组
-//                                        $this->flushThisGroup1();
-                                        return true;
-                                    }
-                                }
-                            }
+                if ($btcPrice > $this->get2HigherPrice()) {
+                    // 是否已经下了平仓单
+                    if (!$this->get2CloseOrder()) {
+                        if (!$this->_ftx->placeTriggerOrder('sell', $this->get2LowerQuantity(), $this->get2LowerPrice(), true)) {
                             return false;
                         }
+                        // 标记已经下了平仓单
+                        $this->set2CloseOrder();
+                    }
+
+                    if ($this->getIsHaveOption()) {
+                        // 有期权
+                        return true;
                     } else {
-                        // 清除开仓单和平仓单状态
+                        // 无期权
+                        if ($higherQuantity = $this->get2LowerQuantity()) {
+                            foreach (range(1, 3) as $value) {
+                                if ($this->_ftx->orderWithMarket('sell', $higherQuantity, true)) {
+                                    // 结束此组
+                                    $this->flushThisGroup2();
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+                } else {
+                    // 在start和higher之间，如果有了平仓单标记，说明是第二轮了
+                    if ($this->get2CloseOrder()) {
                         $this->del2OpenOrder();
                         $this->del2CloseOrder();
+                        return true;
                     }
                 }
             } else {
@@ -230,19 +247,19 @@ class FtxService
 
     public function run()
     {
-        $switch = Redis::get('switch'.$this->_account);
-        if (!$switch) {
-            return false;
-        }
+//        $switch = Redis::get('switch'.$this->_account);
+//        if (!$switch) {
+//            return false;
+//        }
 
-        $param = $this->getLowerParam();
-        foreach ($param as $value) {
-            if (empty($value)) {
-                return false;
-            }
-        }
+//        $param = $this->getLowerParam();
+//        foreach ($param as $value) {
+//            if (empty($value)) {
+//                return false;
+//            }
+//        }
 
-        return $this->hedge();
+        return $this->hedge2();
     }
 
     public function flushThisGroup()
@@ -265,18 +282,22 @@ class FtxService
         Redis::del($this->_account.'lower_quantity');
         Redis::del($this->_account.'higher_price');
         Redis::del($this->_account.'higher_quantity');
+        Redis::del($this->_account.'open_order');
+        Redis::del($this->_account.'close_order');
         return true;
     }
 
     public function flushThisGroup2()
     {
-        Redis::set('switch'.$this->_account, 0);
+        Redis::set('switch'.$this->_account.'2', 0);
         Redis::del($this->_account.'2start_price');
         Redis::del($this->_account.'2lower_price');
         Redis::del($this->_account.'2lower_quantity');
         Redis::del($this->_account.'2start_higher_price');
         Redis::del($this->_account.'2higher_price');
         Redis::del($this->_account.'2higher_quantity');
+        Redis::del($this->_account.'2open_order');
+        Redis::del($this->_account.'2close_order');
         return true;
     }
 
