@@ -238,10 +238,11 @@
 
         <div>
             <br>
+            <a href="/flush?g=1" class="btn btn-danger btn-sm" role="button">&nbsp;清空A组左&nbsp;</a>
             <span>
                 永续合约: {{ $data['currentPrice'] }} &nbsp;&nbsp;&nbsp;
             </span>
-            {{--<a href="/flush" class="btn btn-danger btn-sm" role="button">&nbsp;一键清空&nbsp;</a>--}}
+            <a href="/flush?g=12" class="btn btn-danger btn-sm" role="button">&nbsp;清空A组右&nbsp;</a>
         </div>
 
         <div style="border: black solid 1px; float: left">
@@ -428,6 +429,15 @@
                     <input type="submit" class="btn btn-success ln">
                 </form>
             </div>
+        </div>
+
+        <div>
+            <br>
+            <a href="/flush?g=2" class="btn btn-danger btn-sm" role="button">&nbsp;清空B组左&nbsp;</a>
+            <span>
+                永续合约: {{ $data['currentPrice'] }} &nbsp;&nbsp;&nbsp;
+            </span>
+            <a href="/flush?g=22" class="btn btn-danger btn-sm" role="button">&nbsp;清空B组右&nbsp;</a>
         </div>
 
     </div>

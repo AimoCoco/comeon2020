@@ -107,9 +107,15 @@ class FunctionController extends Controller
         return redirect('/5e1ac823555215b0');
     }
 
-    public function flush()
+    public function flush(Request $request)
     {
-        Redis::FLUSHDB();
+        $group = $request->post('g');
+        switch($group) {
+            case 1: (new FtxService(1))->flushThisGroup1(); break;
+            case 12: (new FtxService(1))->flushThisGroup2(); break;
+            case 2: (new FtxService(2))->flushThisGroup1(); break;
+            case 22: (new FtxService(2))->flushThisGroup2(); break;
+        }
         return redirect('/5e1ac823555215b0');
     }
 }
