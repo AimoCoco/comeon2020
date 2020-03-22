@@ -16,6 +16,7 @@ class IndexController extends Controller
 {
     public function index()
     {
+//        (new FtxService(1))->run();
 //        dd((new FtxService(1))->getIsHaveOption());
         $ftxApi = new FtxApi(
             config('auth.ftx.key1'),

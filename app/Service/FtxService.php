@@ -326,8 +326,7 @@ class FtxService
 
     public function getOpenOrder()
     {
-        Redis::get($this->_account.'open_order');
-        return true;
+        return Redis::get($this->_account.'open_order');
     }
 
     public function setCloseOrder()
@@ -338,8 +337,7 @@ class FtxService
 
     public function getCloseOrder()
     {
-        Redis::get($this->_account.'close_order');
-        return true;
+        return Redis::get($this->_account.'close_order');
     }
 
     public function delCloseOrder()
@@ -429,8 +427,7 @@ class FtxService
 
     public function get2OpenOrder()
     {
-        Redis::get($this->_account.'2open_order');
-        return true;
+        return Redis::get($this->_account.'2open_order');
     }
 
     public function set2CloseOrder()
@@ -441,8 +438,7 @@ class FtxService
 
     public function get2CloseOrder()
     {
-        Redis::get($this->_account.'2close_order');
-        return true;
+        return Redis::get($this->_account.'2close_order');
     }
 
     public function del2CloseOrder()
