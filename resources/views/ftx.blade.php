@@ -341,7 +341,7 @@
             <div>
                 <table class="table-bordered" align="center" style="width:600px">
                     <tr>
-                        <td>A组 SELLCALL账户组</td>
+                        <td>B组 SELLCALL账户组</td>
                         <td>
                             OPTION设立的账号名称：{{ $data['2highSub2'] }} <br>
                             OPTION对冲保护的账号名：{{ $data['2lowSub'] }}
