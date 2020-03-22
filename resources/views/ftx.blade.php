@@ -240,7 +240,7 @@
             <br>
             <a href="/flush?g=1" class="btn btn-danger btn-sm" role="button">&nbsp;清空A组左&nbsp;</a>
             <span>
-                永续合约: {{ $data['currentPrice'] }} &nbsp;&nbsp;&nbsp;
+               &nbsp;&nbsp;&nbsp; 永续合约: {{ $data['currentPrice'] }} &nbsp;&nbsp;&nbsp;
             </span>
             <a href="/flush?g=12" class="btn btn-danger btn-sm" role="button">&nbsp;清空A组右&nbsp;</a>
         </div>
@@ -435,7 +435,7 @@
             <br>
             <a href="/flush?g=2" class="btn btn-danger btn-sm" role="button">&nbsp;清空B组左&nbsp;</a>
             <span>
-                永续合约: {{ $data['currentPrice'] }} &nbsp;&nbsp;&nbsp;
+               &nbsp;&nbsp;&nbsp; 永续合约: {{ $data['currentPrice'] }} &nbsp;&nbsp;&nbsp;
             </span>
             <a href="/flush?g=22" class="btn btn-danger btn-sm" role="button">&nbsp;清空B组右&nbsp;</a>
         </div>
