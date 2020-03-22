@@ -46,12 +46,17 @@ class FtxService
      *
      * @return bool
      */
-    public function getIsHaveOption()
+    public function getIsHaveOption($option = 1)
     {
+        if ($option == 2) {
+            $optionName = 'auth.ftx.option'.$this->_account . '_2';
+        } else {
+            $optionName = 'auth.ftx.option'.$this->_account;
+        }
         $ftx = new FtxApi(
             config('auth.ftx.key'.$this->_account),
             config('auth.ftx.secret'.$this->_account),
-            config('auth.ftx.option'.$this->_account)
+            config($optionName)
         );
         $count = 0;
         foreach (range(1, 3) as $value) {
@@ -144,6 +149,9 @@ class FtxService
                 if (!$this->getOpenOrder()) {
                     // 标记下了开仓单
                     $this->setOpenOrder();
+                    // 清空对手单
+                    $this->_ftx->cancelAllTriggerOrders();
+
                     if (!$this->_ftx->placeTriggerOrder('sell', $this->getLowerQuantity(), $this->getLowerPrice())) {
                         if (!$this->_ftx->orderWithMarket('sell', $this->getLowerQuantity())) {
                             $this->delOpenOrder();
@@ -198,6 +206,9 @@ class FtxService
                 if (!$this->get2OpenOrder()) {
                     // 标记下了开仓单
                     $this->set2OpenOrder();
+                    // 清空对手单
+                    $this->_ftx->cancelAllTriggerOrders();
+
                     if (!$this->_ftx->placeTriggerOrder('buy', $this->get2HigherQuantity(), $this->get2HigherPrice())) {
                         if (!$this->_ftx->orderWithMarket('buy', $this->get2HigherQuantity())) {
                             $this->del2OpenOrder();
@@ -217,7 +228,7 @@ class FtxService
                         }
                     }
 
-                    if ($this->getIsHaveOption()) {
+                    if ($this->getIsHaveOption(2)) {
                         // 有期权
                         return true;
                     } else {
