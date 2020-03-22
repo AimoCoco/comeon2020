@@ -142,23 +142,25 @@ class FtxService
 
                 // 是否已经下了开仓单
                 if (!$this->getOpenOrder()) {
+                    // 标记下了开仓单
+                    $this->setOpenOrder();
                     if (!$this->_ftx->placeTriggerOrder('sell', $this->getLowerQuantity(), $this->getLowerPrice())) {
                         if (!$this->_ftx->orderWithMarket('sell', $this->getLowerQuantity())) {
+                            $this->delOpenOrder();
                             return false;
                         }
                     }
-                    // 标记下了开仓单
-                    $this->setOpenOrder();
                 }
 
                 if ($btcPrice < $this->getLowerPrice()) {
                     // 是否已经下了平仓单
                     if (!$this->getCloseOrder()) {
-                        if (!$this->_ftx->placeTriggerOrder('buy', $this->getHigherQuantity(), $this->getHigherPrice(), true)) {
-                            return false;
-                        }
                         // 标记已经下了平仓单
                         $this->setCloseOrder();
+                        if (!$this->_ftx->placeTriggerOrder('buy', $this->getHigherQuantity(), $this->getHigherPrice(), true)) {
+                            $this->delCloseOrder();
+                            return false;
+                        }
                     }
 
                     if ($this->getIsHaveOption()) {
@@ -194,23 +196,25 @@ class FtxService
 
                 // 是否已经下了开仓单
                 if (!$this->get2OpenOrder()) {
+                    // 标记下了开仓单
+                    $this->set2OpenOrder();
                     if (!$this->_ftx->placeTriggerOrder('buy', $this->get2HigherQuantity(), $this->get2HigherPrice())) {
                         if (!$this->_ftx->orderWithMarket('buy', $this->get2HigherQuantity())) {
+                            $this->del2OpenOrder();
                             return false;
                         }
                     }
-                    // 标记下了开仓单
-                    $this->set2OpenOrder();
                 }
 
                 if ($btcPrice > $this->get2HigherPrice()) {
                     // 是否已经下了平仓单
                     if (!$this->get2CloseOrder()) {
-                        if (!$this->_ftx->placeTriggerOrder('sell', $this->get2LowerQuantity(), $this->get2LowerPrice(), true)) {
-                            return false;
-                        }
                         // 标记已经下了平仓单
                         $this->set2CloseOrder();
+                        if (!$this->_ftx->placeTriggerOrder('sell', $this->get2LowerQuantity(), $this->get2LowerPrice(), true)) {
+                            $this->del2CloseOrder();
+                            return false;
+                        }
                     }
 
                     if ($this->getIsHaveOption()) {
